@@ -2,14 +2,13 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 
-from .models import Loan
-from .serializers import LoanSerializer
+from .models import Loan, Payment
+from .serializers import LoanSerializer, PaymentSerializer
 
 class LoanAPIView(generics.CreateAPIView):
     serializer_class = LoanSerializer
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         serializer = LoanSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -18,4 +17,17 @@ class LoanAPIView(generics.CreateAPIView):
                 'installment': float(serializer.data['installment'])
             }
             return Response(content, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PaymentAPIView(generics.CreateAPIView):
+    serializer_class = PaymentSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = PaymentSerializer(data=request.data, context={'id': self.kwargs.get("id")})
+        if serializer.is_valid():
+            serializer.save()
+            content = {
+                'Status': 'Ok',
+            }
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
