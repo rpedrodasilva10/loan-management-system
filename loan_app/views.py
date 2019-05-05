@@ -1,21 +1,21 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
+from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 
+from .models import Loan
+from .serializers import LoanSerializer
 
-# Create your views here.
+class LoanAPIView(generics.CreateAPIView):
+    serializer_class = LoanSerializer
 
-# Importing models
-from .models import *
-
-# Gets All Loans
-class LoanView(APIView):
-    def get(self, request):
-        loans = Loan.objects.all()
-        return Response({"loans": loans})
-
-# Gets All Payments
-class PaymentView(APIView):
-    def get(self, request):
-        payments = Payment.objects.all()
-        return Response({"payments": payments})
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = LoanSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            content = {
+                'loan_id': serializer.data['id'],
+                'installment': float(serializer.data['installment'])
+            }
+            return Response(content, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
