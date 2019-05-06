@@ -1,14 +1,18 @@
+"""Missing: DOCSTRING"""
+
 from rest_framework import serializers
 
 from loan_app.models import Loan, Payment
 
 class LoanSerializer(serializers.ModelSerializer):
+    """Missing: DOCSTRING"""
     class Meta:
         model = Loan
         fields = '__all__'
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    """Missing: DOCSTRING"""
     class Meta:
         model = Payment
         fields = '__all__'

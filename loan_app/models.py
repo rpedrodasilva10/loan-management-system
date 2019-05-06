@@ -1,7 +1,9 @@
-from django.conf import settings
+"""Missing: DOCSTRING"""
+
 from django.db import models
 
 class Loan(models.Model):
+    """Missing: DOCSTRING"""
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
     term = models.IntegerField(null=False)
     rate = models.DecimalField(max_digits=4, decimal_places=3, null=False)
@@ -10,11 +12,12 @@ class Loan(models.Model):
 
     def __str__(self):
         return (
-            'ID:' + str(self.pk) 
+            'ID:' + str(self.pk)
             + '-Amount:$' + str(self.amount)
         )
 
 class Payment(models.Model):
+    """Missing: DOCSTRING"""
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
     payment = models.CharField(max_length=10, null=False)
     date = models.DateTimeField(auto_now=False, null=False)
@@ -22,7 +25,7 @@ class Payment(models.Model):
 
     def __str__(self):
         return (
-            'ID:' + str(self.pk) 
-            + '-Amount:$' + str(self.amount) 
+            'ID:' + str(self.pk)
+            + '-Amount:$' + str(self.amount)
             + '-Status:' + str(self.payment)
         )

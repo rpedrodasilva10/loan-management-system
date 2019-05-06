@@ -1,13 +1,15 @@
+"""Missing: DOCSTRING"""
+
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
 
-from .models import Loan, Payment
+#from .models import Loan, Payment
 from .serializers import LoanSerializer, PaymentSerializer
 
 from .services import calc_installment
 
 class LoanAPIView(generics.CreateAPIView):
+    """Missing: DOCSTRING"""
     serializer_class = LoanSerializer
 
     def post(self, request, *args, **kwargs):
@@ -22,6 +24,7 @@ class LoanAPIView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PaymentAPIView(generics.CreateAPIView):
+    """Missing: DOCSTRING"""
     serializer_class = PaymentSerializer
 
     def post(self, request, *args, **kwargs):
