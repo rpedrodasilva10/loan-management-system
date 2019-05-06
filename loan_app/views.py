@@ -5,11 +5,13 @@ from rest_framework.renderers import JSONRenderer
 from .models import Loan, Payment
 from .serializers import LoanSerializer, PaymentSerializer
 
+from .services import calc_installment
+
 class LoanAPIView(generics.CreateAPIView):
     serializer_class = LoanSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = LoanSerializer(data=request.data)
+        serializer = LoanSerializer(data=calc_installment(request.data))
         if serializer.is_valid():
             serializer.save()
             content = {
@@ -26,8 +28,5 @@ class PaymentAPIView(generics.CreateAPIView):
         serializer = PaymentSerializer(data=request.data, context={'id': self.kwargs.get("id")})
         if serializer.is_valid():
             serializer.save()
-            content = {
-                'Status': 'Ok',
-            }
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
