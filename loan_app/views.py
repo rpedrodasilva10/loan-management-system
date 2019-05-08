@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 
-
 from .models import Loan
 from .serializers import LoanSerializer, PaymentSerializer
 
@@ -33,15 +32,26 @@ class PaymentAPIView(generics.ListCreateAPIView):
         return get_object_or_404(self.queryset, id=self.kwargs['id'])
 
     def get(self, request, *args, **kwargs):
-        return Response(LoanSerializer(self.get_object()).data, status=status.HTTP_201_CREATED)
+        return Response(
+            LoanSerializer(self.get_object()).data,
+            status=status.HTTP_201_CREATED
+        )
 
     def post(self, request, *args, **kwargs):
         try:
-            loan = Loan.objects.get(id=self.kwargs.get("id"))
-            serializer = PaymentSerializer(data=request.data, context={'loan': loan})
-            if serializer.is_valid():
+            if request.POST:
+                data = request.POST.dict()
+                data.update(
+                    {'loan': self.kwargs.get("id")}
+                )
+                serializer = PaymentSerializer(data=data)
+            else:
+                request.data.update(
+                    {'loan': self.kwargs.get("id")}
+                )
+                serializer = PaymentSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)

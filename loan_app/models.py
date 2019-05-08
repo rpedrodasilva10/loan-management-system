@@ -24,8 +24,18 @@ class Loan(models.Model):
 
 class Payment(models.Model):
     """Missing: DOCSTRING"""
+    MADE = 'made'
+    MISSED = 'missed'
+    PAYMENT_CHOICES = (
+        (MADE, 'made'),
+        (MISSED, 'missed'),
+    )
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
-    payment = models.CharField(max_length=10, null=False)
+    payment = models.CharField(
+        max_length=2,
+        choices=PAYMENT_CHOICES,
+        default=MADE,
+    )
     date = models.DateTimeField(auto_now=False, null=False)
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
 
