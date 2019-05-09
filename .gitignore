@@ -1,0 +1,5 @@
+venv
+.vscode
+*.pyc
+*.sqlite3
+loan_app/migrations/*
