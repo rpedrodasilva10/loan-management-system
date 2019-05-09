@@ -32,7 +32,6 @@ class PaymentSerializer(serializers.ModelSerializer):
     """
     Payment model serializer.
     """
-    #loan = serializer.HiddenField(default=)
     class Meta:
         model = Payment
         fields = ('payment', 'date', 'amount', 'loan')

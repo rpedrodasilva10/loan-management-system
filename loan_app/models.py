@@ -8,7 +8,7 @@ class Loan(models.Model):
     """
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
     term = models.IntegerField(null=False)
-    rate = models.DecimalField(max_digits=4, decimal_places=3, null=False)
+    rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
     date = models.DateTimeField(null=False)
 
     @property
