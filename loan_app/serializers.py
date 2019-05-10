@@ -18,9 +18,7 @@ class LoanSerializer(serializers.ModelSerializer):
         """
         Rounds `installment` to 2 decimals.
         """
-
         ret = super().to_representation(instance)
-
         ret['installment'] = round(ret['installment'], 2)
         return ret
 
@@ -33,22 +31,16 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ('payment', 'date', 'amount', 'loan')
 
     def create(self, validated_data):
-        return Payment.objects.create(
-            loan=validated_data.get('loan'),
-            payment=validated_data.get('payment'),
-            date=validated_data.get('date'),
-            amount=validated_data.get('amount')
+        # needed to add a layer of validation here, because of peculiarity of loan
+        if validated_data['loan'].date < validated_data['date']:
+            return Payment.objects.create(**validated_data)
+        raise serializers.ValidationError(
+            {'date': ['Payment must happen after respective loan approval.']}
         )
 
     def validate(self, attrs):
-        if attrs['date'] < attrs['loan'].date:
-            raise serializers.ValidationError(
-                {'date': ['Payment date must be greater than the refered loan creation date.']}
-            )
-
         if attrs['amount'] < 0:
             raise serializers.ValidationError(
                 {'amount': ['Amount must be positive.']}
             )
-
         return attrs

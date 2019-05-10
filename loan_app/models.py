@@ -62,7 +62,9 @@ class Payment(models.Model):
         (MADE, 'made'),
         (MISSED, 'missed'),
     )
-    loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
+    loan = models.ForeignKey(
+        Loan, related_name='payments', editable=False, on_delete=models.CASCADE
+    )
     payment = models.CharField(
         max_length=2,
         choices=PAYMENT_CHOICES,

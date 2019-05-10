@@ -41,17 +41,14 @@ class PaymentAPIView(generics.ListCreateAPIView):
         try:
             if request.POST:
                 data = request.POST.dict()
-                data.update(
-                    {'loan': self.kwargs.get("id")}
-                )
-                serializer = PaymentSerializer(data=data)
             else:
-                request.data.update(
-                    {'loan': self.kwargs.get("id")}
-                )
-                serializer = PaymentSerializer(data=request.data)
+                data = request.data
+            obj = get_object_or_404(
+                self.queryset, loan_id=self.kwargs.get("loan_id")
+            )
+            serializer = PaymentSerializer(data=data)
             if serializer.is_valid(raise_exception=True):
-                serializer.save()
+                serializer.save(loan=obj)
                 return Response(status=status.HTTP_201_CREATED)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
