@@ -11,19 +11,15 @@ class LoanSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Loan
-        fields = ('id', 'amount', 'term', 'rate', 'date', 'installment')
-        read_only_fields = ['id', 'installment', 'payments']
+        fields = ('id', 'loan_id', 'amount', 'term', 'rate', 'date', 'installment')
+        read_only_fields = ['installment']
 
     def to_representation(self, instance):
         """
-        Converts `id` to '0000-0000-0000-000' format.
         Rounds `installment` to 2 decimals.
         """
 
         ret = super().to_representation(instance)
-
-        with_zeros = '{:016d}'.format(ret['id'])
-        ret['id'] = '-'.join(with_zeros[i:i+4] for i in range(0, len(with_zeros), 4))
 
         ret['installment'] = round(ret['installment'], 2)
         return ret

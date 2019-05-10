@@ -17,7 +17,7 @@ class LoanAPIView(generics.CreateAPIView):
         if serializer.is_valid():
             serializer.save()
             content = {
-                'loan_id': serializer.data['id'],
+                'loan_id': serializer.data['loan_id'],
                 'installment': round(float(serializer.data['installment']), 2)
             }
             return Response(content, status=status.HTTP_201_CREATED)
@@ -29,7 +29,7 @@ class PaymentAPIView(generics.ListCreateAPIView):
     queryset = Loan.objects.all()
 
     def get_object(self):
-        return get_object_or_404(self.queryset, id=self.kwargs['id'])
+        return get_object_or_404(self.queryset, loan_id=self.kwargs['loan_id'])
 
     def get(self, request, *args, **kwargs):
         return Response(

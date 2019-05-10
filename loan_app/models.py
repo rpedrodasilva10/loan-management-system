@@ -1,11 +1,22 @@
 """Missing: DOCSTRING"""
 
+import secrets
+import string
 from django.db import models
+from django.db import IntegrityError
+
 
 class Loan(models.Model):
     """
     Stores the loans entries.
     """
+    loan_id = models.SlugField(
+        primary_key=False,
+        max_length=18,
+        editable=False,
+        unique=True,
+        blank=True,
+    )
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
     term = models.IntegerField(null=False)
     rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
@@ -21,6 +32,27 @@ class Loan(models.Model):
 
     def __str__(self):
         return f'{self.id}'
+
+    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        if not self.loan_id:
+            token = ''.join(secrets.choice(string.digits) for _ in range(15))
+            mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
+            self.loan_id = mask.format(*token)
+        success = False
+        failures = 0
+        while not success:
+            try:
+                super(Loan, self).save(*args, **kwargs)
+            except IntegrityError:
+                failures += 1
+                if failures > 5:
+                    raise
+                token = ''.join(secrets.choice(string.digits) for _ in range(15))
+                mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
+                self.loan_id = mask.format(*token)
+            else:
+                success = True
+
 
 class Payment(models.Model):
     """Missing: DOCSTRING"""

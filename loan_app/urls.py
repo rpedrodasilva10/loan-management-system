@@ -6,7 +6,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path('loans/', LoanAPIView.as_view(), name = 'loan-create'),
-    path('loans/<int:id>/payments', PaymentAPIView.as_view(), name = 'payment-create'),
-    #path('loans/<int:id>/balance', PaymentAPIView.as_view(), name = 'payment-list'),
+    path('loans/', LoanAPIView.as_view(), name='loan-create'),
+    path('loans/<slug:loan_id>/payments', PaymentAPIView.as_view(), name='payment-create'),
 ]
