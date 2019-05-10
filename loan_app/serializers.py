@@ -3,7 +3,7 @@ Serializers for loan api project.
 """
 
 from rest_framework import serializers
-from .models import Loan, Payment
+from .models import Loan, Payment       
 
 class LoanSerializer(serializers.ModelSerializer):
     """

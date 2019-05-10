@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import Loan
 from .serializers import LoanSerializer, PaymentSerializer
 
+
 class LoanAPIView(generics.CreateAPIView):
     """Missing: DOCSTRING"""
     serializer_class = LoanSerializer
