@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'loan_app',
     'rest_framework',
+    'clients',
 ]
 
 MIDDLEWARE = [

@@ -5,6 +5,8 @@ import string
 from django.db import models
 from django.db import IntegrityError
 
+from clients.models import Client
+
 
 class Loan(models.Model):
     """
@@ -17,6 +19,14 @@ class Loan(models.Model):
         unique=True,
         blank=True,
     )
+
+    client_id = models.ForeignKey(
+        Client,
+        related_name='loans',
+        on_delete=models.PROTECT,
+        default=None,
+    )
+
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
     term = models.IntegerField(null=False)
     rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
@@ -64,7 +74,10 @@ class Payment(models.Model):
     )
     payment_id = models.AutoField(primary_key=True)
     loan = models.ForeignKey(
-        Loan, related_name='payments', editable=False, on_delete=models.CASCADE
+        Loan,
+        related_name='payments',
+        editable=False,
+        on_delete=models.CASCADE
     )
     payment = models.CharField(
         max_length=2,

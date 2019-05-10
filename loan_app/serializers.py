@@ -3,7 +3,7 @@ Serializers for loan api project.
 """
 
 from rest_framework import serializers
-from .models import Loan, Payment
+from .models import Loan, Payment       
 
 class LoanSerializer(serializers.ModelSerializer):
     """
@@ -11,7 +11,7 @@ class LoanSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Loan
-        fields = ('loan_id', 'amount', 'term', 'rate', 'date', 'installment')
+        fields = ('loan_id', 'client_id', 'amount', 'term', 'rate', 'date', 'installment')
         read_only_fields = ['installment']
 
     def to_representation(self, instance):

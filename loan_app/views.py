@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import Loan
 from .serializers import LoanSerializer, PaymentSerializer
 
+
 class LoanAPIView(generics.CreateAPIView):
     """Missing: DOCSTRING"""
     serializer_class = LoanSerializer
@@ -23,19 +24,10 @@ class LoanAPIView(generics.CreateAPIView):
             return Response(content, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class PaymentAPIView(generics.ListCreateAPIView):
+class PaymentAPIView(generics.CreateAPIView):
     """Missing: DOCSTRING"""
     serializer_class = PaymentSerializer
     queryset = Loan.objects.all()
-
-    def get_object(self):
-        return get_object_or_404(self.queryset, loan_id=self.kwargs['loan_id'])
-
-    def get(self, request, *args, **kwargs):
-        return Response(
-            LoanSerializer(self.get_object()).data,
-            status=status.HTTP_201_CREATED
-        )
 
     def post(self, request, *args, **kwargs):
         try:
