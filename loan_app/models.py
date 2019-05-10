@@ -27,7 +27,7 @@ class Loan(models.Model):
         """
         Derived attribute.
         """
-        r = float(self.rate) / 12.0 # pylint: disable=invalid-name
+        r = float(self.rate) / self.term # pylint: disable=invalid-name
         return (r + r / ((1 + r) ** float(self.term) - 1)) * float(self.amount)
 
     def __str__(self):

@@ -22,6 +22,23 @@ class LoanSerializer(serializers.ModelSerializer):
         ret['installment'] = round(ret['installment'], 2)
         return ret
 
+    def validate(self, attrs):
+        if attrs['amount'] < 0:
+            raise serializers.ValidationError(
+                {'amount': ['Amount must be positive.']}
+            )
+
+        if attrs['term'] < 0:
+            raise serializers.ValidationError(
+                {'term': ['Term must be positive.']}
+            )
+
+        if attrs['rate'] < 0:
+            raise serializers.ValidationError(
+                {'rate': ['Rate must be positive.']}
+            )
+        return attrs
+
 class PaymentSerializer(serializers.ModelSerializer):
     """
     Payment model serializer.
