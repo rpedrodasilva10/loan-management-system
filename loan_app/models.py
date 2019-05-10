@@ -10,8 +10,8 @@ class Loan(models.Model):
     """
     Stores the loans entries.
     """
-    loan_id = models.SlugField(
-        primary_key=False,
+    loan_id = models.CharField(
+        primary_key=True,
         max_length=18,
         editable=False,
         unique=True,
@@ -31,7 +31,7 @@ class Loan(models.Model):
         return (r + r / ((1 + r) ** float(self.term) - 1)) * float(self.amount)
 
     def __str__(self):
-        return f'{self.id}'
+        return f'{self.loan_id}'
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
@@ -62,6 +62,7 @@ class Payment(models.Model):
         (MADE, 'made'),
         (MISSED, 'missed'),
     )
+    payment_id = models.AutoField(primary_key=True)
     loan = models.ForeignKey(
         Loan, related_name='payments', editable=False, on_delete=models.CASCADE
     )

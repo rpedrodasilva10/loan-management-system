@@ -11,7 +11,7 @@ class LoanSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Loan
-        fields = ('id', 'loan_id', 'amount', 'term', 'rate', 'date', 'installment')
+        fields = ('loan_id', 'amount', 'term', 'rate', 'date', 'installment')
         read_only_fields = ['installment']
 
     def to_representation(self, instance):
@@ -28,7 +28,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Payment
-        fields = ('payment', 'date', 'amount', 'loan')
+        fields = ('payment_id', 'payment', 'date', 'amount', 'loan')
 
     def create(self, validated_data):
         # needed to add a layer of validation here, because of peculiarity of loan
