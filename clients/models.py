@@ -1,7 +1,17 @@
 from django.db import models
 
-# Create your models here.
-class Client(models.Model):
+class Base(models.Model):
+    """
+    Has the standard base for other classes (fields, methods etc)
+    """
+    active = models.BooleanField("Ativo: ", default=True)
+    updated = models.DateTimeField("Atualizado em: ", auto_now=True)
+    created = models.DateTimeField("Criado em: ", auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+class Client(Base):
     """
     Client class abstracts a client in the system
     """

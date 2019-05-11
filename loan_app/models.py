@@ -7,8 +7,18 @@ from django.db import IntegrityError
 
 from clients.models import Client
 
+class Base(models.Model):
+    """
+    Has the standard base for other classes (fields, methods etc)
+    """
+    active = models.BooleanField("Ativo: ", default=True)
+    updated = models.DateTimeField("Atualizado em: ", auto_now=True)
+    created = models.DateTimeField("Criado em: ", auto_now_add=True)
 
-class Loan(models.Model):
+    class Meta:
+        abstract = True
+
+class Loan(Base):
     """
     Stores the loans entries.
     """
@@ -64,7 +74,7 @@ class Loan(models.Model):
                 success = True
 
 
-class Payment(models.Model):
+class Payment(Base):
     """Missing: DOCSTRING"""
     MADE = 'made'
     MISSED = 'missed'
@@ -88,4 +98,4 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
 
     def __str__(self):
-        return f'{self.id}'
+        return f'{self.payment_id}'
