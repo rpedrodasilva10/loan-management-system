@@ -88,6 +88,10 @@ class Loan(Base):
         more than 3 monthly payments or didn’t pay all the loan, you need to
         deny the new one.
         '''
+        if not self.client_id.loans.all():
+            # client doesn't have loans in the past
+            return
+        
         missed_payments = 0
         for loan_obj in self.client_id.loans.all():
             if not loan_obj.active:
@@ -100,9 +104,9 @@ class Loan(Base):
                 )
 
         if missed_payments == 0:
-            self.rate = max(0.0, self.rate - 0.02)
+            self.rate = max(0.0, float(self.rate) - 0.02)
         elif missed_payments < 4:
-            self.rate = self.rate + 0.04
+            self.rate = float(self.rate) + 0.04
         else:
             raise ValidationError(
                 {'loan_id': ['Loan denied. Client missed too many payments.']}
