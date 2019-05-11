@@ -4,6 +4,7 @@ import secrets
 import string
 from django.db import models
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 
 from clients.models import Client
 
@@ -54,24 +55,58 @@ class Loan(Base):
         return f'{self.loan_id}'
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        self.enforce_business_rules()
+
+        # Creating loan_id here instead of put it in a function because
+        # it uses super().save method to check db integrity.
         if not self.loan_id:
             token = ''.join(secrets.choice(string.digits) for _ in range(15))
             mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
             self.loan_id = mask.format(*token)
         success = False
-        failures = 0
         while not success:
             try:
                 super(Loan, self).save(*args, **kwargs)
             except IntegrityError:
-                failures += 1
-                if failures > 5:
-                    raise
                 token = ''.join(secrets.choice(string.digits) for _ in range(15))
                 mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
                 self.loan_id = mask.format(*token)
             else:
                 success = True
+
+    def enforce_business_rules(self):
+        '''
+        Enforces the following business rules:
+
+        1) If a client contracted a loan in the past and paid all without
+        missing any payment, you can decrease by 0.02% his tax rate.
+
+        2) If a client contracted a loan in the past and paid all but missed
+        until 3 monthly payments, you can increase by 0.04% his tax rate.
+
+        3) If a client contracted a loan in the past and paid all but missed
+        more than 3 monthly payments or didn’t pay all the loan, you need to
+        deny the new one.
+        '''
+        missed_payments = 0
+        for loan_obj in self.client_id.loans.all():
+            if not loan_obj.active:
+                for payment_obj in loan_obj.payments.all():
+                    if payment_obj.payment == 'missed':
+                        missed_payments += 1
+            else:
+                raise ValidationError(
+                    {'loan_id': ['Client already have an active Loan.']}
+                )
+
+        if missed_payments == 0:
+            self.rate = max(0.0, self.rate - 0.02)
+        elif missed_payments < 4:
+            self.rate = self.rate + 0.04
+        else:
+            raise ValidationError(
+                {'loan_id': ['Loan denied. Client missed too many payments.']}
+            )
 
 
 class Payment(Base):
