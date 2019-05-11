@@ -2,8 +2,9 @@
 Serializers for loan api project.
 """
 
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from .models import Loan, Payment       
+from .models import Loan, Payment
 
 class LoanSerializer(serializers.ModelSerializer):
     """
@@ -47,17 +48,19 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ('payment_id', 'payment', 'date', 'amount', 'loan')
 
-    def create(self, validated_data):
-        # needed to add a layer of validation here, because of peculiarity of loan
-        if validated_data['loan'].date < validated_data['date']:
-            return Payment.objects.create(**validated_data)
-        raise serializers.ValidationError(
-            {'date': ['Payment must happen after respective loan approval.']}
-        )
-
     def validate(self, attrs):
-        if attrs['amount'] < 0:
+        try:
+            if not attrs['loan'].date < attrs['date']:
+                raise serializers.ValidationError(
+                    {'date': ['Payment must happen after respective loan approval.']}
+                )
+
+            if attrs['amount'] < 0:
+                raise serializers.ValidationError(
+                    {'amount': ['Amount must be positive.']}
+                )
+            return attrs
+        except Loan.DoesNotExist:
             raise serializers.ValidationError(
-                {'amount': ['Amount must be positive.']}
+                {'loan': ['Loan not found.']}
             )
-        return attrs
