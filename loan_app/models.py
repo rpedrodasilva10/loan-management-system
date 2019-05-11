@@ -22,6 +22,8 @@ class Loan(Base):
     """
     Stores the loans entries.
     """
+    finished = models.BooleanField("Pago: ", default=False)
+
     loan_id = models.CharField(
         primary_key=True,
         max_length=18,
@@ -72,6 +74,20 @@ class Loan(Base):
                 self.loan_id = mask.format(*token)
             else:
                 success = True
+    
+    def set_finished(self, finished) -> bool:
+        """
+        Sets the finished column for a loan
+        """
+        self.finished = finished
+    
+    def is_finished(self):
+        """
+        Checks if a loan was fully paid (finished)
+        """
+        #payments = Payment.objects.get(Loan=)
+        pass
+
 
 
 class Payment(Base):
