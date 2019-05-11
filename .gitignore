@@ -2,4 +2,6 @@ venv
 .vscode
 *.pyc
 *.sqlite3
-**/migrations/
+
+clients/migrations/*
+loan_app/migrations/*
