@@ -1,16 +1,18 @@
-"""Missing: DOCSTRING"""
+'''
+TODO
+'''
 
 from rest_framework import generics, status
 from rest_framework.response import Response
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404
 
 from .models import Loan
 from .serializers import LoanSerializer, PaymentSerializer
 
 
 class LoanAPIView(generics.CreateAPIView):
-    """Missing: DOCSTRING"""
+    '''
+    TODO
+    '''
     serializer_class = LoanSerializer
 
     def post(self, request, *args, **kwargs):
@@ -25,22 +27,18 @@ class LoanAPIView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PaymentAPIView(generics.CreateAPIView):
-    """Missing: DOCSTRING"""
+    '''
+    TODO
+    '''
     serializer_class = PaymentSerializer
     queryset = Loan.objects.all()
 
     def post(self, request, *args, **kwargs):
-        try:
-            if request.POST:
-                data = request.POST.dict()
-            else:
-                data = request.data
-            obj = get_object_or_404(
-                self.queryset, loan_id=self.kwargs.get("loan_id")
-            )
-            serializer = PaymentSerializer(data=data)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save(loan=obj)
-                return Response(status=status.HTTP_201_CREATED)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        request.data.update(
+            {'loan': self.kwargs.get("loan")}
+        )
+        serializer = PaymentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

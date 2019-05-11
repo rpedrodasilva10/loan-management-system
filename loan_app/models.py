@@ -91,7 +91,7 @@ class Loan(Base):
         if not self.client_id.loans.all():
             # client doesn't have loans in the past
             return
-        
+
         missed_payments = 0
         for loan_obj in self.client_id.loans.all():
             if not loan_obj.active:
@@ -125,7 +125,6 @@ class Payment(Base):
     loan = models.ForeignKey(
         Loan,
         related_name='payments',
-        editable=False,
         on_delete=models.CASCADE
     )
     payment = models.CharField(
