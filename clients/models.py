@@ -1,5 +1,5 @@
 from django.db import models
-
+from pycpfcnpj import cpfcnpj
 class Base(models.Model):
     """
     Has the standard base for other classes (fields, methods etc)
