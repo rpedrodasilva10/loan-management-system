@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Client
 from pycpfcnpj import cpfcnpj
-from re import compile, fullmatch
+import re
 
 class ClientSerializer(serializers.ModelSerializer):
     """
@@ -9,11 +9,13 @@ class ClientSerializer(serializers.ModelSerializer):
     """
         
     def validate(self, data):
-        
-        pattern = compile(r"\d")
+        """
+        Validate the data before serializer.save
+        """
+        pattern = re.compile(r'^([\d]+)$')
         cpf = data['cpf']
         # Checks if a given CPF has only numbers
-        if not fullmatch(pattern, cpf): 
+        if not bool((re.fullmatch(pattern, cpf))):
             raise serializers.ValidationError(
                 {'cpf': ['Only numbers are allowed']}
             )
