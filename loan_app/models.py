@@ -162,7 +162,7 @@ class Payment(Base):
     loan = models.ForeignKey(Loan, related_name='payments', on_delete=models.CASCADE
     )
     payment = models.CharField(
-        max_length=2,
+        max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
     )
