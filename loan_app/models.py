@@ -21,7 +21,7 @@ class Base(models.Model):
 
 class Loan(Base):
     """
-    Stores the loans entries.
+    Loans class abstracts a loan made to a client 
     """
     finished = models.BooleanField("Pago: ", default=False)
     
@@ -98,7 +98,10 @@ class Loan(Base):
         if value < 0:
             raise ValueError("Can't set a negative Outstanding debt")
         self._outstanding = value
-    
+        
+        if self._outstanding == 0:
+            self.finished = True
+        
 
     def enforce_business_rules(self):
         '''
@@ -137,21 +140,26 @@ class Loan(Base):
             raise ValidationError(
                 {'loan_id': ['Loan denied. Client missed too many payments.']}
             )
+    
+    class Meta:
+        verbose_name = 'Empréstimo'
+        verbose_name_plural = 'Empréstimos'
 
 
 class Payment(Base):
-    """Missing: DOCSTRING"""
+    """
+    Payment class abstracts a payment made referencing 
+    a loan and a client in the system
+    """
     MADE = 'made'
     MISSED = 'missed'
     PAYMENT_CHOICES = (
         (MADE, 'made'),
         (MISSED, 'missed'),
     )
+
     payment_id = models.AutoField(primary_key=True)
-    loan = models.ForeignKey(
-        Loan,
-        related_name='payments',
-        on_delete=models.CASCADE
+    loan = models.ForeignKey(Loan, related_name='payments', on_delete=models.CASCADE
     )
     payment = models.CharField(
         max_length=2,
@@ -163,3 +171,25 @@ class Payment(Base):
 
     def __str__(self):
         return f'{self.payment_id}'
+        
+    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        
+        # We need to work with the actual loan object
+        # because de FK object doesn't have the method save
+        # used to updated d outstanding value
+        loan = Loan.objects.get(pk=self.loan_id)
+
+        # Not sure if we need to check here, validate could
+        # take care of it
+        if  loan.outstanding == 0:
+            raise ValueError("Can't make a payment to a loan fully paid")
+        
+        # Loan.outstanding will check if it is a negative value, no need to check here.
+        loan.outstanding -= self.amount
+        loan.save()
+        super(Payment, self).save(*args, **kwargs)
+        
+        
+    class Meta:
+        verbose_name = 'Pagamento'
+        verbose_name_plural = 'Pagamentos'

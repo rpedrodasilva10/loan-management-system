@@ -13,7 +13,7 @@ class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
         fields = ('loan_id', 'client_id', 'amount', 'term', 'rate', 'date', 'installment')
-        read_only_fields = ['installment']
+        read_only_fields = ['installment', 'outstanding']
 
     def to_representation(self, instance):
         """
@@ -50,6 +50,10 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         try:
+            
+            """
+            TODO - Needs to validate if Loan._outstanding > 0 to make a payment
+            """
             if not attrs['loan'].date < attrs['date']:
                 raise serializers.ValidationError(
                     {'date': ['Payment must happen after respective loan approval.']}
