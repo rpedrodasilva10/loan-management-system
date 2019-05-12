@@ -24,7 +24,7 @@ class Loan(Base):
     Stores the loans entries.
     """
     finished = models.BooleanField("Pago: ", default=False)
-
+    
     loan_id = models.CharField(
         primary_key=True,
         max_length=18,
@@ -44,6 +44,7 @@ class Loan(Base):
     term = models.IntegerField(null=False)
     rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
     date = models.DateTimeField(null=False)
+    _outstanding = models.DecimalField("Valor em aberto: ", max_digits=8, decimal_places=2, null=False)
 
     @property
     def installment(self):
@@ -65,6 +66,12 @@ class Loan(Base):
             token = ''.join(secrets.choice(string.digits) for _ in range(15))
             mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
             self.loan_id = mask.format(*token)
+
+            # Starts the outstanding value
+            # put it here because need to run only one time, like with the id generation
+            outstanding = self.installment * self.term
+            self.outstanding = outstanding
+
         success = False
         while not success:
             try:
@@ -75,20 +82,23 @@ class Loan(Base):
                 self.loan_id = mask.format(*token)
             else:
                 success = True
-    
-    def set_finished(self, finished) -> bool:
-        """
-        Sets the finished column for a loan
-        """
-        self.finished = finished
-    
-    def is_finished(self):
-        """
-        Checks if a loan was fully paid (finished)
-        """
-        #payments = Payment.objects.get(Loan=)
-        pass
 
+    @property
+    def outstanding(self):
+        """
+        Gets the outstanding debt 
+        """
+        return self._outstanding
+
+    @outstanding.setter
+    def outstanding(self, value):
+        """
+        Sets the outstanding debt
+        """
+        if value < 0:
+            raise ValueError("Can't set a negative Outstanding debt")
+        self._outstanding = value
+    
 
     def enforce_business_rules(self):
         '''
@@ -110,7 +120,7 @@ class Loan(Base):
 
         missed_payments = 0
         for loan_obj in self.client_id.loans.all():
-            if not loan_obj.active:
+            if not loan_obj.finished:
                 for payment_obj in loan_obj.payments.all():
                     if payment_obj.payment == 'missed':
                         missed_payments += 1
