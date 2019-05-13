@@ -1,7 +1,6 @@
 '''
 TODO
 '''
-
 from rest_framework import generics, status
 from rest_framework.response import Response
 
@@ -34,10 +33,15 @@ class PaymentAPIView(generics.CreateAPIView):
     queryset = Loan.objects.all()
 
     def post(self, request, *args, **kwargs):
-        request.data.update(
+        
+        # The standard QueryDict object it's not mutable
+        # we need to create a new one with mutable=True
+        mutable_data = request.POST.copy()
+        mutable_data.mutable = True
+        mutable_data.update(
             {'loan': self.kwargs.get("loan")}
         )
-        serializer = PaymentSerializer(data=request.data)
+        serializer = PaymentSerializer(data=mutable_data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
