@@ -143,7 +143,7 @@ class Loan(Base):
     
     class Meta:
         verbose_name = 'Empréstimo'
-        verbose_name_plural = 'Empréstimos'
+        verbose_name_plural = 'Empréstimo'
 
 
 class Payment(Base):
