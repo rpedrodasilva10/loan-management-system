@@ -2,6 +2,7 @@
 
 import secrets
 import string
+import decimal
 from django.db import models
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
@@ -40,53 +41,23 @@ class Loan(Base):
         default=None,
     )
 
-    amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
-    term = models.IntegerField(null=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False)
+    term = models.DecimalField(max_digits=3, decimal_places=0, null=False)
     rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
     date = models.DateTimeField(null=False)
-    _outstanding = models.DecimalField(
-        "Valor em aberto: ",
-        max_digits=8,
+    instalment = models.DecimalField(
+        "Valor da parcela: ",
+        max_digits=12,
         decimal_places=2,
         null=False
     )
 
-    @property
-    def installment(self):
-        """
-        Derived attribute.
-        """
-        r = float(self.rate) / self.term # pylint: disable=invalid-name
-        return (r + r / ((1 + r) ** float(self.term) - 1)) * float(self.amount)
-
-    def __str__(self):
-        return f'{self.loan_id}'
-
-    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
-        self.enforce_business_rules()
-
-        # Creating loan_id here instead of put it in a function because
-        # it uses super().save method to check db integrity.
-        if not self.loan_id:
-            token = ''.join(secrets.choice(string.digits) for _ in range(15))
-            mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
-            self.loan_id = mask.format(*token)
-
-            # Starts the outstanding value
-            # put it here because need to run only one time, like with the id generation
-            outstanding = self.installment * self.term
-            self.outstanding = outstanding
-
-        success = False
-        while not success:
-            try:
-                super(Loan, self).save(*args, **kwargs)
-            except IntegrityError:
-                token = ''.join(secrets.choice(string.digits) for _ in range(15))
-                mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
-                self.loan_id = mask.format(*token)
-            else:
-                success = True
+    _outstanding = models.DecimalField(
+        "Valor em aberto: ",
+        max_digits=12,
+        decimal_places=2,
+        null=False
+    )
 
     @property
     def outstanding(self):
@@ -107,6 +78,47 @@ class Loan(Base):
         if self._outstanding == 0:
             self.finished = True
 
+    def __str__(self):
+        return f'{self.loan_id}'
+
+
+    def __init__(self, *args, **kwargs):
+
+        super(Loan, self).__init__(*args, **kwargs)
+
+        # calculate instalment
+        _r = self.rate / self.term
+        instalment = (_r + _r / ((1 + _r) ** self.term - 1)) * self.amount
+        self.instalment = instalment.quantize(
+            decimal.Decimal("0.01"),
+            decimal.ROUND_DOWN
+        )
+
+        # inicialize outstanding
+        outstanding = self.instalment * self.term
+        self.outstanding = outstanding
+
+    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+
+        if not self.loan_id:
+            self.enforce_business_rules()
+
+            # Creating loan_id here instead of put it in a function because
+            # it uses super().save method to check db integrity.
+            token = ''.join(secrets.choice(string.digits) for _ in range(15))
+            mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
+            self.loan_id = mask.format(*token)
+
+            success = False
+            while not success:
+                try:
+                    super(Loan, self).save(*args, **kwargs)
+                except IntegrityError:
+                    token = ''.join(secrets.choice(string.digits) for _ in range(15))
+                    mask = '{}{}{}-{}{}{}{}-{}{}{}{}-{}{}{}{}'
+                    self.loan_id = mask.format(*token)
+                else:
+                    success = True
 
     def enforce_business_rules(self):
         '''
@@ -128,7 +140,7 @@ class Loan(Base):
 
         missed_payments = 0
         for loan_obj in self.client_id.loans.all():
-            if not loan_obj.finished:
+            if loan_obj.finished:
                 for payment_obj in loan_obj.payments.all():
                     if payment_obj.payment == 'missed':
                         missed_payments += 1

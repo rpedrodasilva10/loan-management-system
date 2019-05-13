@@ -20,7 +20,7 @@ class LoanAPIView(generics.CreateAPIView):
             serializer.save()
             content = {
                 'loan_id': serializer.data['loan_id'],
-                'installment': round(float(serializer.data['installment']), 2)
+                'instalment': serializer.data['instalment']
             }
             return Response(content, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
