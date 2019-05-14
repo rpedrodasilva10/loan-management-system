@@ -185,9 +185,8 @@ class Payment(Base):
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if self.payment == self.MADE:
-            loan = Loan.objects.get(pk=self.loan_id)
-            loan.outstanding -= self.amount
-            loan.save()
+            self.loan_id.outstanding -= self.amount
+            self.loan_id.save()
         super(Payment, self).save(*args, **kwargs)
 
     class Meta:
