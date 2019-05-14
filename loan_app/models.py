@@ -73,7 +73,6 @@ class Loan(Base):
         if value < 0:
             raise ValueError("Can't set a negative outstanding debt.")
         self._outstanding = value
-
         if self._outstanding == 0:
             self.finished = True
 
@@ -82,16 +81,17 @@ class Loan(Base):
 
     def __init__(self, *args, **kwargs):
         super(Loan, self).__init__(*args, **kwargs)
-        # calculate instalment
-        _r = self.rate / self.term
-        instalment = (_r + _r / ((1 + _r) ** self.term - 1)) * self.amount
-        self.instalment = instalment.quantize(
-            decimal.Decimal("0.01"),
-            decimal.ROUND_DOWN
-        )
-        # inicialize outstanding
-        outstanding = self.instalment * self.term
-        self.outstanding = outstanding
+        if not self.loan_id:
+            # calculate instalment
+            _r = self.rate / self.term
+            instalment = (_r + _r / ((1 + _r) ** self.term - 1)) * self.amount
+            self.instalment = instalment.quantize(
+                decimal.Decimal("0.01"),
+                decimal.ROUND_DOWN
+            )
+            # inicialize outstanding
+            outstanding = self.instalment * self.term
+            self.outstanding = outstanding
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
@@ -111,6 +111,8 @@ class Loan(Base):
                     self.loan_id = mask.format(*token)
                 else:
                     success = True
+        else:
+            super(Loan, self).save(*args, **kwargs)
 
     def enforce_business_rules(self):
         """
