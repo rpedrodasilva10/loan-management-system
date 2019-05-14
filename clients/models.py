@@ -25,6 +25,9 @@ class Client(Base):
     def __str__(self):
         return f'{self.client_id} - {self.name} {self.surname}'
 
+    def get_client(self):
+        return self.name + ' ' + self.surname + ' e-mail ' + self.email + ' telephone ' + self.telephone + ' cpf ' + self.cpf
+        
     class Meta:
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
