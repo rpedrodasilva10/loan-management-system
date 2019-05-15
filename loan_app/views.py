@@ -4,6 +4,8 @@ Views for loan_app application.
 
 from rest_framework import generics, status
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 from .models import Loan
 from .serializers import LoanSerializer, PaymentSerializer
 
@@ -43,3 +45,28 @@ class PaymentAPIView(generics.CreateAPIView):
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class BalanceApiView(generics.CreateAPIView):
+    '''
+    TODO
+    '''
+
+    queryset = Loan.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        mutable_data = request.POST.copy()
+        mutable_data.mutable = True        
+
+        try:
+            loan = get_object_or_404(
+                Loan.objects.all(),
+                loan_id=self.kwargs.get("loan_id")
+            )
+            content = {
+                'balance': loan.get_balance(mutable_data['date'])
+            }
+            return Response(content, status=status.HTTP_200_OK)
+        except Http404:
+            content = {'loan_id': 'Loan not found.'}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)

@@ -76,6 +76,17 @@ class Loan(Base):
         if self._outstanding == 0:
             self.finished = True
 
+    @property
+    def total_value(self):
+        return decimal.Decimal(self.term * self.instalment).quantize(
+            decimal.Decimal('0.01'),
+            decimal.ROUND_DOWN
+        )
+    
+    def get_balance(self, date):
+        amount_paid = Payment.get_paid_amount(self.loan_id, date)
+        return self.total_value - amount_paid
+
     def __str__(self):
         return f'{self.loan_id}'
 
@@ -188,6 +199,20 @@ class Payment(Base):
             self.loan_id.outstanding -= self.amount
             self.loan_id.save()
         super(Payment, self).save(*args, **kwargs)
+
+    @staticmethod
+    def get_paid_amount(loan_id, date):
+        payments = Payment.objects.filter(
+            loan_id__loan_id=loan_id
+        ).filter(
+            payment=Payment.MADE
+        ).filter(
+            date__lte=date
+        )
+        return sum([p.amount for p in payments]).quantize(
+            decimal.Decimal('0.01'),
+            decimal.ROUND_DOWN
+        )
 
     class Meta:
         verbose_name = 'Payment'
