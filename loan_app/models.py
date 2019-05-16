@@ -187,18 +187,30 @@ class Payment(Base):
         return f'{self.payment_id}'
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        self.enforce_business_rules()
+        if self.payment == self.MADE:
+            self.loan_id.outstanding -= self.amount
+            self.loan_id.save()
+        super(Payment, self).save(*args, **kwargs)
+
+    def enforce_business_rules(self):
+        """
+        Enforces the following business rules:
+
+        1) there must be only one payment per month (made or missed);
+        2) the payment amount must be exactly the instalment value.
+        """
         if self.loan_id.payments.filter(
                 date__month=self.date.month,
                 date__year=self.date.year
             ).count():
             raise ValidationError(
-                {'date': 'Payment already registered for this month'}
+                {'date': 'Payment already registered for this month.'}
             )
-
-        if self.payment == self.MADE:
-            self.loan_id.outstanding -= self.amount
-            self.loan_id.save()
-        super(Payment, self).save(*args, **kwargs)
+        if self.amount != self.loan_id.instalment:
+            raise ValidationError(
+                {'amount': f'your instalment amount is {self.loan_id.instalment}!'}
+            )
 
     class Meta:
         verbose_name = 'Payment'
