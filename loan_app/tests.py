@@ -1,12 +1,16 @@
+"""
+Tests for loan_app application.
+"""
+
 import json
-from django.test import TestCase
 from pycpfcnpj import gen
-from clients.models import Client
+from django.test import TestCase
 from django.urls import reverse
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
 
+from clients.models import Client
 
 class LoanTest(TestCase):
     """ Test module for Client model """
@@ -17,11 +21,18 @@ class LoanTest(TestCase):
             'carolina', 'carol@gmail.com', self.password
         )
         Client.objects.create(
-            name='Felicity', surname='Jones', email='felicity@gmail.com', telephone='11984345678', cpf=gen.cpf()
+            name='Felicity',
+            surname='Jones',
+            email='felicity@gmail.com',
+            telephone='11984345678',
+            cpf=gen.cpf()
         )
         self.client = Client.objects.get(name='Felicity')
 
     def test_post_valid_loan(self):
+        """
+        TODO
+        """
         loan = APIClient()
         loan.login(username=self.user.username, password=self.password)
         response = loan.post(
@@ -37,6 +48,9 @@ class LoanTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_post_invalid_loan(self):
+        """
+        TODO
+        """
         loan = APIClient()
         loan.login(username=self.user.username, password=self.password)
         response = loan.post(

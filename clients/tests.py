@@ -1,16 +1,22 @@
+"""
+Tests for clients application.
+"""
+
 import json
 from django.test import TestCase
-from pycpfcnpj import gen
-from clients.models import Client
 from django.urls import reverse
+from django.contrib.auth.models import User
+from pycpfcnpj import gen
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
 
+from clients.models import Client
 
 class ClientTest(TestCase):
-    """ Test module for Client model """
-    
+    """
+    Test module for client model.
+    """
+
     def setUp(self):
         self.password = '123'
         self.user = User.objects.create_user(
@@ -18,16 +24,26 @@ class ClientTest(TestCase):
         )
 
         Client.objects.create(
-            name='Felicity', surname='Jones', email='felicity@gmail.com', telephone='11984345678', cpf='34598712387'
+            name='Felicity',
+            surname='Jones',
+            email='felicity@gmail.com',
+            telephone='11984345678',
+            cpf='34598712387'
         )
 
-    def test_create_client(self):
+    def test_puppy_breed(self):
+        """
+        TODO
+        """
         client_jones = Client.objects.get(name='Felicity')
 
         self.assertEqual(
             client_jones.__str__(), "1 - Felicity Jones")
 
     def test_post_valid_client(self):
+        """
+        TODO
+        """
         client = APIClient()
         client.login(username=self.user.username, password=self.password)
         response = client.post(
@@ -43,6 +59,9 @@ class ClientTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_invalid_client(self):
+        """
+        TODO
+        """
         client = APIClient()
         client.login(username=self.user.username, password=self.password)
         response = client.post(

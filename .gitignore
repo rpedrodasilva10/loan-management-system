@@ -2,9 +2,6 @@ venv
 .vscode
 *.pyc
 *.sqlite3
-<<<<<<< HEAD
-**/migrations/
-=======
+__pycache__
 
-**/migrations/
->>>>>>> develop
+.DS_Store
