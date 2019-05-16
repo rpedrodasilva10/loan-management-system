@@ -152,7 +152,6 @@ class Loan(Base):
             self.rate = float(self.rate) + 0.04
         else:
             self.rate = max(0.0, float(self.rate) - 0.02)
-        # recalculate instalment 
 
     class Meta:
         verbose_name = 'Loan'
@@ -188,6 +187,14 @@ class Payment(Base):
         return f'{self.payment_id}'
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        if self.loan_id.payments.filter(
+                date__month=self.date.month,
+                date__year=self.date.year
+            ).count():
+            raise ValidationError(
+                {'date': 'Payment already registered for this month'}
+            )
+
         if self.payment == self.MADE:
             self.loan_id.outstanding -= self.amount
             self.loan_id.save()
