@@ -49,7 +49,7 @@ class PaymentAPIView(generics.CreateAPIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class BalanceApiView(generics.CreateAPIView):
+class BalanceApiView(generics.ListAPIView):
     '''
     TODO
     '''
