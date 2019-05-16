@@ -6,7 +6,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.http import Http404
-from iso8601 import parse_date
+from datetime import datetime
 from .models import Loan
 
 from .serializers import LoanSerializer, PaymentSerializer
@@ -56,18 +56,13 @@ class BalanceApiView(generics.CreateAPIView):
 
     queryset = Loan.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
             loan = get_object_or_404(
                 Loan.objects.all(),
                 loan_id=self.kwargs.get("loan_id")
             )
-            date = request.data['date']
-
-            if loan.date > parse_date(date):
-                content = {'date': f'date must be greather than {loan.date}'}
-                return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
+            date = datetime.now()
             content = {'balance': loan.get_balance(date)}
             return Response(content, status=status.HTTP_200_OK)
         except Http404:
