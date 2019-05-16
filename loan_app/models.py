@@ -41,6 +41,7 @@ class Loan(Base):
         related_name='loans',
         on_delete=models.PROTECT,
         default=None,
+        null=False,
     )
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     term = models.DecimalField(max_digits=3, decimal_places=0, null=False)
@@ -179,6 +180,7 @@ class Payment(Base):
         max_length=2,
         choices=PAYMENT_CHOICES,
         default=MADE,
+        null=False
     )
     date = models.DateTimeField(auto_now=False, null=False)
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
