@@ -82,8 +82,9 @@ class Loan(Base):
     def __init__(self, *args, **kwargs):
         super(Loan, self).__init__(*args, **kwargs)
         if not self.loan_id:
+            self.enforce_business_rules()
             # calculate instalment
-            _r = self.rate / self.term
+            _r = decimal.Decimal(self.rate) / decimal.Decimal(self.term)
             instalment = (_r + _r / ((1 + _r) ** self.term - 1)) * self.amount
             self.instalment = instalment.quantize(
                 decimal.Decimal("0.01"),
@@ -95,7 +96,6 @@ class Loan(Base):
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
-            self.enforce_business_rules()
             # Creating loan_id here instead of put it in a function because
             # it uses super().save method to check db integrity.
             token = ''.join(secrets.choice(string.digits) for _ in range(15))
@@ -131,24 +131,28 @@ class Loan(Base):
         if not self.client_id.loans.all():
             # client doesn't have loans in the past
             return
-        missed_payments = 0
+        raise_rate = False
         for loan_obj in self.client_id.loans.all():
             if loan_obj.finished:
+                missed_payments = 0
                 for payment_obj in loan_obj.payments.all():
                     if payment_obj.payment == 'missed':
                         missed_payments += 1
+                if missed_payments > 3:
+                    raise ValidationError({
+                        'loan_id':['Loan denied. Client missed too many payments.']
+                    })
+                if missed_payments > 0:
+                    raise_rate = True
             else:
                 raise ValidationError(
                     {'loan_id': ['Client already have an active Loan.']}
                 )
-        if missed_payments == 0:
-            self.rate = max(0.0, float(self.rate) - 0.02)
-        elif missed_payments < 4:
+        if raise_rate:
             self.rate = float(self.rate) + 0.04
         else:
-            raise ValidationError(
-                {'loan_id': ['Loan denied. Client missed too many payments.']}
-            )
+            self.rate = max(0.0, float(self.rate) - 0.02)
+        # recalculate instalment 
 
     class Meta:
         verbose_name = 'Loan'
