@@ -59,6 +59,13 @@ class Loan(Base):
         null=False
     )
 
+    _total_value = models.DecimalField(
+        "total value",
+        max_digits=12,
+        decimal_places=2,
+        null=False
+    )
+
     @property
     def outstanding(self):
         """
@@ -76,6 +83,10 @@ class Loan(Base):
         self._outstanding = value
         if self._outstanding == 0:
             self.finished = True
+    
+    def get_balance(self, date):
+        amount_paid = Payment.get_paid_amount(self.loan_id, date)
+        return self._total_value - amount_paid
 
     def __str__(self):
         return f'{self.loan_id}'
@@ -94,6 +105,10 @@ class Loan(Base):
             # inicialize outstanding
             outstanding = self.instalment * self.term
             self.outstanding = outstanding
+            self._total_value = outstanding.quantize(
+                decimal.Decimal("0.01"),
+                decimal.ROUND_DOWN
+            )
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
@@ -213,6 +228,20 @@ class Payment(Base):
             raise ValidationError(
                 {'amount': f'your instalment amount is {self.loan_id.instalment}!'}
             )
+    @staticmethod
+    def get_paid_amount(loan_id, date):
+        payments = Payment.objects.filter(
+            loan_id__loan_id=loan_id
+        ).filter(
+            payment=Payment.MADE
+        ).filter(
+            date__lte=date
+        )
+        total_paid = decimal.Decimal(sum([p.amount for p in payments]))
+        return total_paid.quantize(
+            decimal.Decimal('0.01'),
+            decimal.ROUND_DOWN
+        )
 
     class Meta:
         verbose_name = 'Payment'
