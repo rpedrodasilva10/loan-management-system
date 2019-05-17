@@ -9,7 +9,7 @@ from django.http import Http404
 from datetime import datetime
 from .models import Loan
 
-from .serializers import LoanSerializer, PaymentSerializer
+from .serializers import LoanSerializer, PaymentSerializer, BalanceSerializer
 
 class LoanAPIView(generics.CreateAPIView):
     """
@@ -49,11 +49,11 @@ class PaymentAPIView(generics.CreateAPIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class BalanceApiView(generics.CreateAPIView):
+class BalanceApiView(generics.ListAPIView):
     '''
     TODO
     '''
-
+    serializer_class = BalanceSerializer
     queryset = Loan.objects.all()
 
     def get(self, request, *args, **kwargs):

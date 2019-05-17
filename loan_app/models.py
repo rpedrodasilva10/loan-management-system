@@ -192,7 +192,7 @@ class Payment(Base):
         on_delete=models.CASCADE
     )
     payment = models.CharField(
-        max_length=2,
+        max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
         null=False

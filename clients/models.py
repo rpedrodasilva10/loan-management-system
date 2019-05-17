@@ -22,24 +22,16 @@ class Client(Base):
     """
     Abstracts a client in the system.
     """
-    client_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    surname = models.CharField(max_length=100)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=11)
-    cpf = models.CharField("CPF", max_length=11, unique=True)
+    client_id = models.AutoField(primary_key=True, help_text="unique id of a client.")
+    name = models.CharField(max_length=100, help_text="the client name.")
+    surname = models.CharField(max_length=100, help_text="the client surname.")
+    email = models.EmailField(help_text="the client email.")
+    telephone = models.CharField(max_length=11, help_text="the client telephone.")
+    cpf = models.CharField("CPF", max_length=11, unique=True, help_text="the client identification.")
 
     def __str__(self):
         return f'{self.client_id} - {self.name} {self.surname}'
 
-    def get_client(self):
-        """
-        Returns the client's information as a string.
-        """
-        return self.name + ' ' + self.surname \
-            + ' e-mail ' + self.email \
-            + ' telephone ' + self.telephone \
-            + ' CPF ' + self.cpf
 
     class Meta:
         verbose_name = 'Client'
