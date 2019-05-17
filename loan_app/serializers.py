@@ -51,3 +51,11 @@ class PaymentSerializer(serializers.ModelSerializer):
                 {'amount': ['Amount must be positive.']}
             )
         return attrs
+
+class BalanceSerializer(serializers.ModelSerializer):
+    """
+    Balance endpoint serializer.
+    """
+    class Meta:
+        model = Payment
+        exclude = ('active', 'payment_id', 'payment', 'date', 'amount', 'loan_id')
