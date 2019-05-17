@@ -81,11 +81,14 @@ WSGI_APPLICATION = 'lms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-default_dburl = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+DEFAULT_DBURL = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 
-DATABASES = DATABASES = { 'default': config('DATABASE_URL',
-                                            default=default_dburl,
-                                            cast=dburl),
+DATABASES = DATABASES = {
+    'default': config(
+        'DATABASE_URL',
+        default=DEFAULT_DBURL,
+        cast=dburl
+    ),
 }
 
 
@@ -111,9 +114,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = 'en-US'
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -136,6 +139,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'COERCE_DECIMAL_TO_STRING': False,
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

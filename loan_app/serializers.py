@@ -1,8 +1,7 @@
 """
-Serializers for loan api project.
+Serializers for loan_app application.
 """
 
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from .models import Loan, Payment
 
@@ -12,29 +11,19 @@ class LoanSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Loan
-        fields = ('loan_id', 'client_id', 'amount', 'term', 'rate', 'date', 'installment')
-        read_only_fields = ['installment', 'outstanding']
-
-    def to_representation(self, instance):
-        """
-        Rounds `installment` to 2 decimals.
-        """
-        ret = super().to_representation(instance)
-        ret['installment'] = round(ret['installment'], 2)
-        return ret
+        fields = ('loan_id', 'client_id', 'amount', 'term', 'rate', 'date', 'instalment')
+        read_only_fields = ['instalment', 'outstanding']
 
     def validate(self, attrs):
-        if attrs['amount'] < 0:
+        if attrs['amount'] <= 0:
             raise serializers.ValidationError(
                 {'amount': ['Amount must be positive.']}
             )
-
-        if attrs['term'] < 0:
+        if attrs['term'] <= 0:
             raise serializers.ValidationError(
                 {'term': ['Term must be positive.']}
             )
-
-        if attrs['rate'] < 0:
+        if attrs['rate'] <= 0:
             raise serializers.ValidationError(
                 {'rate': ['Rate must be positive.']}
             )
@@ -46,25 +35,27 @@ class PaymentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Payment
-        fields = ('payment_id', 'payment', 'date', 'amount', 'loan')
+        fields = ('payment_id', 'payment', 'date', 'amount', 'loan_id')
 
     def validate(self, attrs):
-        try:
-            
-            """
-            TODO - Needs to validate if Loan._outstanding > 0 to make a payment
-            """
-            if not attrs['loan'].date < attrs['date']:
-                raise serializers.ValidationError(
-                    {'date': ['Payment must happen after respective loan approval.']}
-                )
-
-            if attrs['amount'] < 0:
-                raise serializers.ValidationError(
-                    {'amount': ['Amount must be positive.']}
-                )
-            return attrs
-        except Loan.DoesNotExist:
+        if attrs['loan_id'].finished:
             raise serializers.ValidationError(
-                {'loan': ['Loan not found.']}
+                {'loan_id': ['This loan is already fully payed.']}
             )
+        if not attrs['loan_id'].date < attrs['date']:
+            raise serializers.ValidationError(
+                {'date': ['Payment must happen after respective loan approval.']}
+            )
+        if attrs['amount'] < 0:
+            raise serializers.ValidationError(
+                {'amount': ['Amount must be positive.']}
+            )
+        return attrs
+
+class BalanceSerializer(serializers.ModelSerializer):
+    """
+    Balance endpoint serializer.
+    """
+    class Meta:
+        model = Payment
+        exclude = ('active', 'payment_id', 'payment', 'date', 'amount', 'loan_id')
