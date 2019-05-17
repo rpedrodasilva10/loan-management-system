@@ -173,8 +173,8 @@ class Loan(Base):
             self.rate = max(0.0, float(self.rate) - 0.02)
 
     class Meta:
-        verbose_name = 'Loan'
-        verbose_name_plural = 'Loans'
+        verbose_name = 'Empréstimo'
+        verbose_name_plural = 'Empréstimo'
 
 
 class Payment(Base):
