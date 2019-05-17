@@ -43,15 +43,17 @@ class Loan(Base):
         on_delete=models.PROTECT,
         default=None,
         null=False,
+        help_text = "unique id of a client. "
     )
-    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False)
-    term = models.DecimalField(max_digits=3, decimal_places=0, null=False)
-    rate = models.DecimalField(max_digits=4, decimal_places=4, null=False)
-    date = models.DateTimeField(null=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, help_text = "loan amount in dollars.")
+    term = models.DecimalField(max_digits=3, decimal_places=0, null=False, help_text = "number of months that will take until the loan gets paid-off.")
+    rate = models.DecimalField(max_digits=4, decimal_places=4, null=False, help_text = "interest rate as decimal.")
+    date = models.DateTimeField(null=False, help_text = "when the loan was requested (origination date as an ISO 8601 string).")
     instalment = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        null=False
+        null=False,
+        help_text="monthly loan payment.",
     )
     _outstanding = models.DecimalField(
         "outstanding",
@@ -193,16 +195,18 @@ class Payment(Base):
     loan_id = models.ForeignKey(
         Loan,
         related_name='payments',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        help_text="unique id of the loan.",
     )
     payment = models.CharField(
         max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
-        null=False
+        null=False,
+        help_text = "type of payment: made or missed.",
     )
-    date = models.DateTimeField(auto_now=False, null=False)
-    amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
+    date = models.DateTimeField(auto_now=False, null=False, help_text = "payment date.")
+    amount = models.DecimalField(max_digits=8, decimal_places=2, null=False, help_text = "amount of the payment made or missed in dollars.")
 
     def __str__(self):
         return f'{self.payment_id}'
