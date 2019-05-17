@@ -32,14 +32,6 @@ class Client(Base):
     def __str__(self):
         return f'{self.client_id} - {self.name} {self.surname}'
 
-    def get_client(self):
-        """
-        Returns the client's information as a string.
-        """
-        return self.name + ' ' + self.surname \
-            + ' e-mail ' + self.email \
-            + ' telephone ' + self.telephone \
-            + ' CPF ' + self.cpf
 
     class Meta:
         verbose_name = 'Client'
