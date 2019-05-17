@@ -5,6 +5,7 @@ Models for loan_app application.
 import secrets
 import string
 import decimal
+from django.utils import timezone
 from django.db import models
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
@@ -218,7 +219,8 @@ class Payment(Base):
         Enforces the following business rules:
 
         1) there must be only one payment per month (made or missed);
-        2) the payment amount must be exactly the instalment value.
+        2) the payment amount must be exactly the instalment value;
+        3) ensure future payments are not allowed.
         """
         if self.loan_id.payments.filter(
                 date__month=self.date.month,
@@ -227,10 +229,15 @@ class Payment(Base):
             raise ValidationError(
                 {'date': 'Payment already registered for this month.'}
             )
+        if self.date > timezone.now():
+            raise ValidationError(
+                {'date': 'Cannot performe future payments.'}
+            )
         if self.amount != self.loan_id.instalment:
             raise ValidationError(
                 {'amount': f'your instalment amount is {self.loan_id.instalment}!'}
             )
+
     @staticmethod
     def get_paid_amount(loan_id, date):
         """

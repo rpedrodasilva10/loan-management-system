@@ -27,7 +27,12 @@ class Client(Base):
     surname = models.CharField(max_length=100, help_text="the client surname.")
     email = models.EmailField(help_text="the client email.")
     telephone = models.CharField(max_length=11, help_text="the client telephone.")
-    cpf = models.CharField("CPF", max_length=11, unique=True, help_text="the client identification.")
+    cpf = models.CharField(
+        "CPF",
+        max_length=11,
+        unique=True,
+        help_text="the client identification."
+    )
 
     def __str__(self):
         return f'{self.client_id} - {self.name} {self.surname}'
