@@ -83,8 +83,11 @@ class Loan(Base):
         self._outstanding = value
         if self._outstanding == 0:
             self.finished = True
-    
+
     def get_balance(self, date):
+        """
+        Gets the outstanding balance.
+        """
         amount_paid = Payment.get_paid_amount(self.loan_id, date)
         return self._total_value - amount_paid
 
@@ -230,6 +233,9 @@ class Payment(Base):
             )
     @staticmethod
     def get_paid_amount(loan_id, date):
+        """
+        Gets the total amount payed for a specific loan until a specific date.
+        """
         payments = Payment.objects.filter(
             loan_id__loan_id=loan_id
         ).filter(
