@@ -58,7 +58,7 @@ class PaymentAPIView(generics.CreateAPIView):
 
 class BalanceApiView(generics.ListAPIView):
     '''
-    TODO
+    View for Get /loan/<:loan_id:>/balance endpoint.
     '''
     serializer_class = BalanceSerializer
     queryset = Loan.objects.all()
