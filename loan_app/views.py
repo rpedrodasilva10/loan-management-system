@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from datetime import datetime
+from django.core.exceptions import ValidationError
+
 from .models import Loan
 
 from .serializers import LoanSerializer, PaymentSerializer, BalanceSerializer
@@ -19,14 +21,17 @@ class LoanAPIView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = LoanSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            content = {
-                'loan_id': serializer.data['loan_id'],
-                'instalment': serializer.data['instalment']
-            }
-            return Response(content, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if serializer.is_valid():
+                serializer.save()
+                content = {
+                    'loan_id': serializer.data['loan_id'],
+                    'instalment': serializer.data['instalment']
+                }
+                return Response(content, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as error:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentAPIView(generics.CreateAPIView):
@@ -43,11 +48,13 @@ class PaymentAPIView(generics.CreateAPIView):
             data = request.data
         data.update({'loan_id': self.kwargs.get("loan_id")})
         serializer = PaymentSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
+        try:
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as error:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 class BalanceApiView(generics.ListAPIView):
     '''

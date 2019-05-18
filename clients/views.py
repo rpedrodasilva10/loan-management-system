@@ -16,7 +16,6 @@ class ClientAPIView(generics.CreateAPIView):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-
             content = {
                 'client_id': serializer.data['client_id'],
             }

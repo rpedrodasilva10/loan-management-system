@@ -15,15 +15,15 @@ class LoanSerializer(serializers.ModelSerializer):
         read_only_fields = ['instalment', 'outstanding']
 
     def validate(self, attrs):
-        if attrs['amount'] < 0:
+        if attrs['amount'] <= 0:
             raise serializers.ValidationError(
                 {'amount': ['Amount must be positive.']}
             )
-        if attrs['term'] < 0:
+        if attrs['term'] <= 0:
             raise serializers.ValidationError(
                 {'term': ['Term must be positive.']}
             )
-        if attrs['rate'] < 0:
+        if attrs['rate'] <= 0:
             raise serializers.ValidationError(
                 {'rate': ['Rate must be positive.']}
             )
