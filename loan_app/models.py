@@ -42,30 +42,50 @@ class Loan(Base):
         related_name='loans',
         on_delete=models.PROTECT,
         default=None,
-        help_text = "unique id of a client. ",
+        help_text="unique id of a client. ",
         null=False,
     )
-    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, help_text = "loan amount in dollars.")
-    term = models.DecimalField(max_digits=3, decimal_places=0, null=False, help_text = "number of months that will take until the loan gets paid-off.")
-    rate = models.DecimalField(max_digits=4, decimal_places=4, null=False, help_text = "interest rate as decimal.")
-    date = models.DateTimeField(null=False, help_text = "when the loan was requested (origination date as an ISO 8601 string).")
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=False,
+        help_text="loan amount in dollars."
+    )
+    term = models.DecimalField(
+        max_digits=3,
+        decimal_places=0,
+        null=False,
+        help_text="number of months that will take until the loan gets paid-off."
+    )
+    rate = models.DecimalField(
+        max_digits=4,
+        decimal_places=4,
+        null=False,
+        help_text="interest rate as decimal."
+    )
+    date = models.DateTimeField(
+        null=False,
+        help_text="when the loan was requested (origination date as an ISO 8601 string)."
+    )
     instalment = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         null=False,
+        blank=True,
         help_text="monthly loan payment.",
     )
     _outstanding = models.DecimalField(
         "outstanding",
         max_digits=12,
         decimal_places=2,
+        blank=True,
         null=False
     )
-
     _total_value = models.DecimalField(
         "total value",
         max_digits=12,
         decimal_places=2,
+        blank=True,
         null=False
     )
 
@@ -97,8 +117,7 @@ class Loan(Base):
     def __str__(self):
         return f'{self.loan_id}'
 
-    def __init__(self, *args, **kwargs):
-        super(Loan, self).__init__(*args, **kwargs)
+    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
             self.enforce_business_rules()
             # calculate instalment
@@ -108,6 +127,7 @@ class Loan(Base):
                 decimal.Decimal("0.01"),
                 decimal.ROUND_DOWN
             )
+
             # inicialize outstanding
             outstanding = self.instalment * self.term
             self.outstanding = outstanding
@@ -116,8 +136,6 @@ class Loan(Base):
                 decimal.ROUND_DOWN
             )
 
-    def save(self, *args, **kwargs):# pylint: disable=arguments-differ
-        if not self.loan_id:
             # Creating loan_id here instead of put it in a function because
             # it uses super().save method to check db integrity.
             token = ''.join(secrets.choice(string.digits) for _ in range(15))
@@ -205,8 +223,17 @@ class Payment(Base):
         help_text = "type of payment: made or missed.",
         null=False
     )
-    date = models.DateTimeField(auto_now=False, null=False, help_text = "payment date.")
-    amount = models.DecimalField(max_digits=8, decimal_places=2, null=False, help_text = "amount of the payment made or missed in dollars.")
+    date = models.DateTimeField(
+        auto_now=False,
+        null=False,
+        help_text="payment date."
+    )
+    amount = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=False,
+        help_text="amount of the payment made or missed in dollars."
+    )
 
     def __str__(self):
         return f'{self.payment_id}'
