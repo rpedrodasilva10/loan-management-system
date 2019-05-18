@@ -29,7 +29,7 @@ class Loan(Base):
     """
     Abstracts a loan made to a :model:`clients.Client`.
     """
-    finished = models.BooleanField("Payed", default=False)
+    finished = models.BooleanField("Paid", default=False)
     loan_id = models.CharField(
         primary_key=True,
         max_length=18,
@@ -272,7 +272,7 @@ class Payment(Base):
     @staticmethod
     def get_paid_amount(loan_id, date):
         """
-        Gets the total amount payed for a specific loan until a specific date.
+        Gets the total amount paid for a specific loan until a specific date.
         """
         payments = Payment.objects.filter(
             loan_id__loan_id=loan_id

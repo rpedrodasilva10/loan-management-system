@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(default=True, verbose_name='Active')),
                 ('updated', models.DateTimeField(auto_now=True, verbose_name='Updated')),
                 ('created', models.DateTimeField(auto_now_add=True, verbose_name='Created')),
-                ('finished', models.BooleanField(default=False, verbose_name='Payed')),
+                ('finished', models.BooleanField(default=False, verbose_name='Paid')),
                 ('loan_id', models.CharField(blank=True, editable=False, max_length=18, primary_key=True, serialize=False, unique=True)),
                 ('amount', models.DecimalField(decimal_places=2, help_text='loan amount in dollars.', max_digits=12)),
                 ('term', models.DecimalField(decimal_places=0, help_text='number of months that will take until the loan gets paid-off.', max_digits=3)),

@@ -40,7 +40,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['loan_id'].finished:
             raise serializers.ValidationError(
-                {'loan_id': ['This loan is already fully payed.']}
+                {'loan_id': ['This loan is already fully paid.']}
             )
         if not attrs['loan_id'].date < attrs['date']:
             raise serializers.ValidationError(
