@@ -31,7 +31,7 @@ class ClientTest(TestCase):
             cpf='34598712387'
         )
 
-    def test_puppy_breed(self):
+    def test_post(self):
         """
         TODO
         """
