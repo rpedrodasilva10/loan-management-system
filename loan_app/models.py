@@ -41,6 +41,7 @@ class Loan(Base):
         related_name='loans',
         on_delete=models.PROTECT,
         default=None,
+        null=False,
     )
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     term = models.DecimalField(max_digits=3, decimal_places=0, null=False)
@@ -82,8 +83,11 @@ class Loan(Base):
         self._outstanding = value
         if self._outstanding == 0:
             self.finished = True
-    
+
     def get_balance(self, date):
+        """
+        Gets the outstanding balance.
+        """
         amount_paid = Payment.get_paid_amount(self.loan_id, date)
         return self._total_value - amount_paid
 
@@ -93,8 +97,9 @@ class Loan(Base):
     def __init__(self, *args, **kwargs):
         super(Loan, self).__init__(*args, **kwargs)
         if not self.loan_id:
+            self.enforce_business_rules()
             # calculate instalment
-            _r = self.rate / self.term
+            _r = decimal.Decimal(self.rate) / decimal.Decimal(self.term)
             instalment = (_r + _r / ((1 + _r) ** self.term - 1)) * self.amount
             self.instalment = instalment.quantize(
                 decimal.Decimal("0.01"),
@@ -110,7 +115,6 @@ class Loan(Base):
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
         if not self.loan_id:
-            self.enforce_business_rules()
             # Creating loan_id here instead of put it in a function because
             # it uses super().save method to check db integrity.
             token = ''.join(secrets.choice(string.digits) for _ in range(15))
@@ -146,24 +150,27 @@ class Loan(Base):
         if not self.client_id.loans.all():
             # client doesn't have loans in the past
             return
-        missed_payments = 0
+        raise_rate = False
         for loan_obj in self.client_id.loans.all():
             if loan_obj.finished:
+                missed_payments = 0
                 for payment_obj in loan_obj.payments.all():
                     if payment_obj.payment == 'missed':
                         missed_payments += 1
+                if missed_payments > 3:
+                    raise ValidationError({
+                        'loan_id':['Loan denied. Client missed too many payments.']
+                    })
+                if missed_payments > 0:
+                    raise_rate = True
             else:
                 raise ValidationError(
                     {'loan_id': ['Client already have an active Loan.']}
                 )
-        if missed_payments == 0:
-            self.rate = max(0.0, float(self.rate) - 0.02)
-        elif missed_payments < 4:
+        if raise_rate:
             self.rate = float(self.rate) + 0.04
         else:
-            raise ValidationError(
-                {'loan_id': ['Loan denied. Client missed too many payments.']}
-            )
+            self.rate = max(0.0, float(self.rate) - 0.02)
 
     class Meta:
         verbose_name = 'Loan'
@@ -191,6 +198,7 @@ class Payment(Base):
         max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
+        null=False
     )
     date = models.DateTimeField(auto_now=False, null=False)
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=False)
@@ -199,13 +207,35 @@ class Payment(Base):
         return f'{self.payment_id}'
 
     def save(self, *args, **kwargs):# pylint: disable=arguments-differ
+        self.enforce_business_rules()
         if self.payment == self.MADE:
             self.loan_id.outstanding -= self.amount
             self.loan_id.save()
         super(Payment, self).save(*args, **kwargs)
 
+    def enforce_business_rules(self):
+        """
+        Enforces the following business rules:
+
+        1) there must be only one payment per month (made or missed);
+        2) the payment amount must be exactly the instalment value.
+        """
+        if self.loan_id.payments.filter(
+                date__month=self.date.month,
+                date__year=self.date.year
+            ).count():
+            raise ValidationError(
+                {'date': 'Payment already registered for this month.'}
+            )
+        if self.amount != self.loan_id.instalment:
+            raise ValidationError(
+                {'amount': f'your instalment amount is {self.loan_id.instalment}!'}
+            )
     @staticmethod
     def get_paid_amount(loan_id, date):
+        """
+        Gets the total amount payed for a specific loan until a specific date.
+        """
         payments = Payment.objects.filter(
             loan_id__loan_id=loan_id
         ).filter(
