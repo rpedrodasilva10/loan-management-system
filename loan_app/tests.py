@@ -102,3 +102,4 @@ class LoanTest(TestCase):
 
     def test_balance(self):
         self.assertEqual(self.loan_jones.get_balance(self.loan_jones.date), Decimal('1027.20')) 
+        
