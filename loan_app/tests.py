@@ -101,4 +101,4 @@ class LoanTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_balance(self):
-        self.assertEqual(self.loan_jones.get_balance(self.loan_jones.date), Decimal('1027.20'))
+        self.assertEqual(self.loan_jones.get_balance(self.loan_jones.date), Decimal('1027.20')) 
