@@ -1,4 +1,5 @@
 # Client and Loan Management System
+[![Python 3.6](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Heroku App Status](http://heroku-shields.herokuapp.com/thenightswatch-lms)](https://thenightswatch-lms.herokuapp.com/) ![CodeStypeBlack](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 # Objective
 The main objective of this project was to create an API to manage clients and the loan payments control system from a fin-tech.
@@ -134,16 +135,8 @@ Create a record of a payment made or missed
 
 #### Summary
 
-Get the volume of outstanding debt (i.e., debt yet to be paid) at some point in time.
+Get the volume of outstanding debt (i.e., debt yet to be paid) at the moment of requisition.
 
-#### Payload
-
-date: loan balance until this date.
-### Example of sent data
-
-    {
-        “date”: “2017-09-05 02:18Z”
-    }
 #### Reply
 
 balance: outstanding debt of loan.
