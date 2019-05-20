@@ -44,6 +44,7 @@ class Loan(Base):
         default=None,
         help_text="unique id of a client. ",
         null=False,
+
     )
     amount = models.DecimalField(
         max_digits=12,
