@@ -3,7 +3,6 @@ Tests for loan_app application.
 """
 
 import json
-import datetime
 from decimal import Decimal
 from pycpfcnpj import gen
 from django.test import TestCase
@@ -12,6 +11,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APIClient
 from loan_app.models import Loan
+from loan_app.models import Payment
 from clients.models import Client
 
 
@@ -50,9 +50,9 @@ class LoanTest(TestCase):
         )
         self.loan_jones = Loan.objects.get(client_id=self.client_jones.client_id)
 
-    def test_post_valid_loan(self):
+    def test_post_valid_loan_one(self):
         """
-        TODO
+        Create valid loan application.
         """
         loan = APIClient()
         loan.login(username=self.user.username, password=self.password)
@@ -68,9 +68,27 @@ class LoanTest(TestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_post_invalid_loan(self):
+    def test_post_valid_loan_two(self):
         """
-        TODO
+        Create valid loan application.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 20103.23,
+                        'term': 10,
+                        'rate': 0.01,
+                        'date': '2019-05-19 09:10'
+                        }),
+            content_type='application/json'
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_post_invalid_loan_one(self):
+        """
+        Create a loan missing amount.
         """
         loan = APIClient()
         loan.login(username=self.user.username, password=self.password)
@@ -87,8 +105,201 @@ class LoanTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_post_invalid_loan_two(self):
+        """
+        Create a loan missing term.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': '',
+                        'rate': 0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
 
-    def test_payment(self):
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_three(self):
+        """
+        Create a loan missing rate.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': 12,
+                        'rate': '',
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_four(self):
+        """
+        Create a loan missing date.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': 12,
+                        'rate': 0.05,
+                        'date': ''
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_five(self):
+        """
+        Create a loan with negative amount.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': -1000,
+                        'term': 12,
+                        'rate': 0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_six(self):
+        """
+        Create a loan with negative term.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': -12,
+                        'rate': 0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_seven(self):
+        """
+        Create a loan with negative rate.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': 12,
+                        'rate': -0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_post_invalid_loan_eight(self):
+        """
+        Create a loan with zero amount.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 0,
+                        'term': 12,
+                        'rate': 0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_nine(self):
+        """
+        Create a loan with zero term.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': 0,
+                        'rate': 0.05,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_ten(self):
+        """
+        Create a loan with zero rate.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': self.client_silva.client_id,
+                        'amount': 1000,
+                        'term': 12,
+                        'rate': 0.0,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_loan_eleven(self):
+        """
+        Create a loan without client.
+        """
+        loan = APIClient()
+        loan.login(username=self.user.username, password=self.password)
+        response = loan.post(
+            reverse('loan-create'),
+            json.dumps({'client_id': '',
+                        'amount': 1000,
+                        'term': 12,
+                        'rate': 0.0,
+                        'date': '2019-05-19 14:40Z'
+                        }),
+            content_type='application/json'
+
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_invalid_payment_one(self):
+        """
+        Create an invalid payment.
+        """
         payment = APIClient()
         payment.login(username=self.user.username, password=self.password)
         response = payment.post(
@@ -103,6 +314,7 @@ class LoanTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_balance(self):
-        self.assertEqual(self.loan_jones.get_balance(self.loan_jones.date), Decimal('1027.20')) 
-        
-
+        """
+        Get the balance.
+        """
+        self.assertEqual(self.loan_jones.get_balance(self.loan_jones.date), Decimal('1027.20'))

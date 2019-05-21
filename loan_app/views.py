@@ -15,7 +15,7 @@ from .serializers import LoanSerializer, PaymentSerializer, BalanceSerializer
 
 class LoanAPIView(generics.CreateAPIView):
     """
-    View for POST /loan endpoint.
+    Create a loan application.
     """
     serializer_class = LoanSerializer
 
@@ -36,7 +36,7 @@ class LoanAPIView(generics.CreateAPIView):
 
 class PaymentAPIView(generics.CreateAPIView):
     """
-    View for Post /loan/<:loan_id>/payment endpoint.
+    Create a new payment (made / missed) for loan <:loan_id>.
     """
     serializer_class = PaymentSerializer
     queryset = Loan.objects.all()
@@ -58,7 +58,7 @@ class PaymentAPIView(generics.CreateAPIView):
 
 class BalanceApiView(generics.ListAPIView):
     '''
-    View for Get /loan/<:loan_id:>/balance endpoint.
+    Get the outstanding balance of a loan <:loan_id> at the moment of the requisition.
     '''
     serializer_class = BalanceSerializer
     queryset = Loan.objects.all()
