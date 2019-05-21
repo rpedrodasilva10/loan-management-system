@@ -221,7 +221,7 @@ class Payment(Base):
         max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
-        help_text = "type of payment: made or missed.",
+        help_text="type of payment: made or missed.",
         null=False
     )
     date = models.DateTimeField(
@@ -230,7 +230,7 @@ class Payment(Base):
         help_text="payment date."
     )
     amount = models.DecimalField(
-        max_digits=8,
+        max_digits=12,
         decimal_places=2,
         null=False,
         help_text="amount of the payment made or missed in dollars."
