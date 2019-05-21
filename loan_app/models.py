@@ -42,9 +42,8 @@ class Loan(Base):
         related_name='loans',
         on_delete=models.PROTECT,
         default=None,
-        help_text="unique id of a client. ",
         null=False,
-
+        help_text="unique id of a client."
     )
     amount = models.DecimalField(
         max_digits=12,
@@ -181,13 +180,13 @@ class Loan(Base):
                         missed_payments += 1
                 if missed_payments > 3:
                     raise ValidationError({
-                        'loan_id':['Loan denied. Client missed too many payments.']
+                        'loan_id': 'Loan denied. Client missed too many payments.'
                     })
                 if missed_payments > 0:
                     raise_rate = True
             else:
                 raise ValidationError(
-                    {'loan_id': ['Client already have an active Loan.']}
+                    {'loan_id': 'Client already have an active Loan.'}
                 )
         if raise_rate:
             self.rate = float(self.rate) + 0.04
@@ -221,8 +220,8 @@ class Payment(Base):
         max_length=6,
         choices=PAYMENT_CHOICES,
         default=MADE,
-        help_text = "type of payment: made or missed.",
-        null=False
+        null=False,
+        help_text="type of payment: made or missed."
     )
     date = models.DateTimeField(
         auto_now=False,
@@ -230,7 +229,7 @@ class Payment(Base):
         help_text="payment date."
     )
     amount = models.DecimalField(
-        max_digits=8,
+        max_digits=12,
         decimal_places=2,
         null=False,
         help_text="amount of the payment made or missed in dollars."
