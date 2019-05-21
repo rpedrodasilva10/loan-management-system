@@ -8,7 +8,7 @@ from .serializers import ClientSerializer
 
 class ClientAPIView(generics.CreateAPIView):
     """
-    Create a new client
+    Create a new client.
     """
     serializer_class = ClientSerializer
 
