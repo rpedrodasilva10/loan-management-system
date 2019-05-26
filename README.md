@@ -19,6 +19,27 @@ Loans are paid back in monthly instalments.
 
 # Endpoints
 
+### GET /clients/pk or GET /clients
+
+#### Summary
+
+Get a specific client or, if an PK (ID) wasn't provided, lists all clients.
+
+#### Reply
+
+- data of the client(s) 
+
+#### Example of received data
+
+    {
+        "client_id": 1,
+        “name”: “Felicity”,
+        “surname”: “Jones”,
+        “email”: “felicity@gmail.com”,
+        “telephone”: “11984345678”,
+        “cpf”: “34598712387”
+    }
+
 ### POST /clients
 
 #### Summary
