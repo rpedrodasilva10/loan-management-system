@@ -10,7 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('loans/', LoanAPIView.as_view(), name='loan-create'),
-    path('loans/<str:loan_id>/payments', PaymentAPIView.as_view(), name='payment-create'),
-    path('loans/<str:loan_id>/balance', BalanceApiView.as_view(), name='balance-get'),
+    path('', LoanAPIView.as_view(), name='loan-create'),
+    path('<str:loan_id>/payments', PaymentAPIView.as_view(), name='payment-create'),
+    path('<str:loan_id>/balance', BalanceApiView.as_view(), name='balance-get'),
 ]

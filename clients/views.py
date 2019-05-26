@@ -2,15 +2,18 @@
 Views for clients application.
 """
 
-from rest_framework import generics, status
+from rest_framework import generics, status, views
 from rest_framework.response import Response
 from .serializers import ClientSerializer
+from .models import Client
 
-class ClientAPIView(generics.CreateAPIView):
+
+class ClientListCreateAPIView(generics.ListCreateAPIView):
     """
-    Create a new client.
+    Create a client or lists all clients in the database.
     """
     serializer_class = ClientSerializer
+    queryset = Client.objects.all()
 
     def post(self, request, *args, **kwargs):
         serializer = ClientSerializer(data=request.data)
@@ -21,3 +24,11 @@ class ClientAPIView(generics.CreateAPIView):
             }
             return Response(content, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClientDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a client.  
+    """
+    serializer_class = ClientSerializer
+    queryset = Client.objects.all()
