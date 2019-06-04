@@ -10,7 +10,6 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 
 from .models import Loan
-
 from .serializers import LoanSerializer, PaymentSerializer, BalanceSerializer
 
 
@@ -34,6 +33,13 @@ class LoanAPIView(generics.ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as error:
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+class LoanDetailView(generics.RetrieveAPIView):
+    """
+    Retrieve a specific loan.  
+    """
+    serializer_class = LoanSerializer
+    queryset = Loan.objects.all()
 
 
 class PaymentAPIView(generics.CreateAPIView):
