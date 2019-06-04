@@ -13,11 +13,13 @@ from .models import Loan
 
 from .serializers import LoanSerializer, PaymentSerializer, BalanceSerializer
 
-class LoanAPIView(generics.CreateAPIView):
+
+class LoanAPIView(generics.ListCreateAPIView):
     """
     Create a loan application.
     """
     serializer_class = LoanSerializer
+    queryset = Loan.objects.all()
 
     def post(self, request, *args, **kwargs):
         serializer = LoanSerializer(data=request.data)
@@ -55,6 +57,7 @@ class PaymentAPIView(generics.CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as error:
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
 
 class BalanceApiView(generics.ListAPIView):
     '''
